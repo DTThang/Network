@@ -46,6 +46,7 @@ systemctl enable mariadb
 - Nên thay đổi cài đặt biến của Mysql để có hiệu suất tốt hơn. Chỉnh sửa file cấu hình tùy thuộc vào hệ điều hành 
 
 - Chỉnh sửa file /etc/my.cnf.d/mariadb-server.cnf  
+
         vim /etc/my.cnf.d/mariadb-server.cnf  
 
 ```
