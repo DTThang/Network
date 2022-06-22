@@ -111,9 +111,9 @@ exit
 - Nhập database mặc định vào cacti database       
 
         mysql cacti < /usr/share/doc/cacti/cacti.sql -u cactiuser -p
-        ```
-        user password : cactipassword
-        ```
+```
+user password : cactipassword
+```
 
 - Chỉnh sửa file cấu hình để chỉ định loại database, name, hostname, user và password
 
@@ -161,12 +161,11 @@ Allow from all   #
 
         vim /etc/php.ini
 
-
-        # nội dung
-        date.timezone = Asia/Ho_Chi_Minh
-        memory_limit = 512M
-        max_execution_time = 60    
-
+```
+date.timezone = Asia/Ho_Chi_Minh
+memory_limit = 512M
+max_execution_time = 60    
+```
 - Khởi động lại dịch vụ  
     
         systemctl restart httpd
