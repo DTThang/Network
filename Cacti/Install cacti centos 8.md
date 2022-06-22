@@ -76,7 +76,6 @@ innodb_io_capacity_max=10000
 - Nhập  
 ```
 # mysql -u root -p
-Enter password:
 ```
 ```
 create database cacti;
@@ -89,7 +88,7 @@ exit
 - cactiuser phải có quyền truy cập vào bảng mysql.time_zone_name. Để làm điều đó, nhập mysql_test_data_timezone.sql vào cơ sở dữ liệu mysql.
 
         mysql -u root -p mysql < /usr/share/mariadb/mysql_test_data_timezone.sql
-        user password : 
+        
 
 
 Sau đó login vào mysql 
@@ -112,8 +111,9 @@ exit
 - Nhập database mặc định vào cacti database       
 
         mysql cacti < /usr/share/doc/cacti/cacti.sql -u cactiuser -p
+        ```
         user password : cactipassword
-
+        ```
 
 - Chỉnh sửa file cấu hình để chỉ định loại database, name, hostname, user và password
 
@@ -134,9 +134,9 @@ $database_port = '3306';
 
         vim /etc/cron.d/cacti
 
-        
-        # Nội dung file 
-        */5 * * * *     apache  /usr/bin/php /usr/share/cacti/poller.php > /dev/null 2>&1
+```        
+*/5 * * * *     apache  /usr/bin/php /usr/share/cacti/poller.php > /dev/null 2>&1
+```
 
 - Chỉnh sửa file  cấu hình Apache để thực hiện cài đặt từ xa.
 
