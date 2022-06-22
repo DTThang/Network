@@ -14,7 +14,9 @@ yum update -y
 ```
 - Gói cacti có sẵn trong EPEL repository for Centos 8
 
+        dnf install -y epel-release
         dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
 - Cài đặt Apache
 
         dnf install httpd -y
@@ -55,7 +57,7 @@ collation-server=utf8mb4_unicode_ci
 character-set-server=utf8mb4
 max_heap_table_size=32M
 tmp_table_size=32M
-join_buffer_size=64MS
+join_buffer_size=64M
 # 25% Of Total System Memory
 innodb_buffer_pool_size=1GB
 # pool_size/128 for less than 1GB of memory
@@ -77,15 +79,18 @@ innodb_io_capacity_max=10000
 Enter password:
 ```
 ```
-create database cacti;# Tạo database để cài đặt Cacti.
-GRANT ALL ON cacti.* TO cactiuser@localhost IDENTIFIED BY 'cactipassword'; # cấp quyền cho database mới tạo
+create database cacti;
+GRANT ALL ON cacti.* TO cactiuser@localhost IDENTIFIED BY 'cactipassword';
 flush privileges;
 exit
+
 ```
 
 - cactiuser phải có quyền truy cập vào bảng mysql.time_zone_name. Để làm điều đó, nhập mysql_test_data_timezone.sql vào cơ sở dữ liệu mysql.
 
         mysql -u root -p mysql < /usr/share/mariadb/mysql_test_data_timezone.sql
+        user password : 
+
 
 Sau đó login vào mysql 
 
@@ -106,10 +111,9 @@ exit
 
 - Nhập database mặc định vào cacti database       
 
-        mysql -u root -p cacti < /usr/share/doc/cacti/cacti.sql
+        mysql cacti < /usr/share/doc/cacti/cacti.sql -u cactiuser -p
+        user password : cactipassword
 
-        mysql  cacti < /usr/share/doc/cacti/cacti.sql -u cactiuser -p
-        Enter password:cactipassword
 
 - Chỉnh sửa file cấu hình để chỉ định loại database, name, hostname, user và password
 
