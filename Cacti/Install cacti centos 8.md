@@ -129,10 +129,12 @@ Your MariaDB connection id is 8
 Server version: 10.3.11-MariaDB MariaDB Server
 right (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-MariaDB [(none)]>create database cacti;# Tạo database để cài đặt Cacti.
-MariaDB [(none)]>GRANT ALL ON cacti.* TO cactiuser@localhost IDENTIFIED BY 'cactipassword'; # cấp quyền cho database mới tạo
-MariaDB [(none)]>flush privileges;
-MariaDB [(none)]>exit
+```
+```
+create database cacti;# Tạo database để cài đặt Cacti.
+GRANT ALL ON cacti.* TO cactiuser@localhost IDENTIFIED BY 'cactipassword'; # cấp quyền cho database mới tạo
+flush privileges;
+exit
 ```
 
 - cactiuser phải có quyền truy cập vào bảng mysql.time_zone_name. Để làm điều đó, nhập mysql_test_data_timezone.sql vào cơ sở dữ liệu mysql.
@@ -145,9 +147,9 @@ Sau đó login vào mysql
 
 Cấp quyền cho cactiuser
 ```
-MariaDB [(none)]>GRANT SELECT ON mysql.time_zone_name TO cactiuser@localhost;
-MariaDB [(none)]>flush privileges;
-MariaDB [(none)]>exit
+GRANT SELECT ON mysql.time_zone_name TO cactiuser@localhost;
+flush privileges;
+exit
 ```
 
 # 4. Cài đặt và cấu hình cacti
