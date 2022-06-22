@@ -15,6 +15,9 @@ yum update -y
 - Gói cacti có sẵn trong EPEL repository for Centos 8
 
         dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+- Cài đặt Apache
+
+        dnf install httpd -y
 
 - Cài đặt SNMP và RRDTool
 
@@ -206,7 +209,7 @@ Allow from all   #
 
         vim /etc/php.ini
         # nội dung
-        date.timezone = US/Central
+        date.timezone = Asia/Ho_Chi_Minh
         memory_limit = 512M
         max_execution_time = 60    
 
