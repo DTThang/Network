@@ -160,7 +160,7 @@ exit
 
 - Nhập database mặc định vào cacti database       
 
-        mysql cacti < /usr/share/doc/cacti/cacti.sql -u cactiuser -p
+        mysql -u root -p cacti < /usr/share/doc/cacti/cacti.sql
 
 - Chỉnh sửa file cấu hình để chỉ định loại database, name, hostname, user và password
 
