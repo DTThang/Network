@@ -133,6 +133,8 @@ $database_port = '3306';
 - Chỉnh sửa file  /etc/cron.d/cacti  để quét thông tin mỗi ​​năm phút một lần.
 
         vim /etc/cron.d/cacti
+
+        
         # Nội dung file 
         */5 * * * *     apache  /usr/bin/php /usr/share/cacti/poller.php > /dev/null 2>&1
 
@@ -158,6 +160,8 @@ Allow from all   #
 - Thiết lập time zone 
 
         vim /etc/php.ini
+
+
         # nội dung
         date.timezone = Asia/Ho_Chi_Minh
         memory_limit = 512M
