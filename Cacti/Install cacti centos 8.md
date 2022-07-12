@@ -191,3 +191,196 @@ user/pass: admin/admin
 
 
 
+# Install on centos 7
+
+- Update System
+
+                yum update -y
+
+- Install Apache 
+
+                yum -y install httpd httpd-devel
+
+- Restart Apache service and Enable Apache auto startup when server startup.
+```
+systemctl restart httpd
+systemctl enable httpd
+```
+- Install Net-SNMP and RRDTools
+
+                yum -y install net-snmp net-snmp-utils net-snmp-libs rrdtool
+
+- Restart Apache service and Enable Apache auto startup when server startup.
+```
+systemctl restart snmpd
+systemctl enable snmpd
+```
+- Install PHP and PHP Extensions
+
+The current Cacti version requires PHP 7.2+, so we need to install from Remi repository because by default the PHP version available in base OS repository is version 5.4.   Create Remi Repository with the below command.
+
+                yum install -y https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+
+  - Install PHP 7.3 from the Remi repository.
+
+                yum install -y --enablerepo=remi-php73 php php-xml php-session php-sockets php-ldap php-gd php-gmp php-intl php-mbstring php-mysqlnd php-pdo php-process php-snmp
+
+  - PHP recommended changing the following settings in /etc/php.ini file. Before making a change please verify the timezone on our system.
+
+                ls -l /etc/localtime
+
+                vi /etc/php.ini
+```
+date.timezone = Asian/Phnom_Penh
+memory_limit = 512M
+max_execution_time = 60
+```
+- Install MariaDB
+
+By default, MariaDB v5.4 is available in the based Centos repository. The current Cacti version recommended MariaDB v5.6+. We will install MariaDB v10+, so we need to create a new repository for MariaDB. Create a new repository.
+
+        vim /etc/yum.repos.d/mariadb.repo
+```
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.4/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+```
+- Install MariaDB with the below commands.
+
+                yum install -y MariaDB-server MariaDB-client
+
+Restart MariaDB and enable to auto-start when the server starts.
+```
+systemctl restart mariadb
+systemctl enable mariadb
+```
+- Create Database
+
+  - The password is not set for MariaDB, so we need to so secure it with the command below.
+
+                mysqladmin -u root password your_strong_password
+
+  - Login into our database with a password just set at the moment.
+
+                mysql -u root -p
+
+  - Create a database and username for Cacti.
+  ```
+  create database cacti;
+  GRANT ALL ON cacti.* TO cactiuser@localhost IDENTIFIED BY 'p@$$w0rd';
+  flush privileges;
+  exit;
+  ```
+
+  - we need to grant access to the MySQL TimeZone database for user Cacti so that the database is populated with global TimeZone information. Import database to mysql_test_data_timezone.sql first.
+
+                mysql -u root -p mysql < /usr/share/mysql/mysql_test_data_timezone.sql
+                password: p@$$w0rd
+  - Login into our database again.
+
+                mysql -u root -p
+
+  - Grant permission to cacti user.
+  ```
+  GRANT SELECT ON mysql.time_zone_name TO cactiuser@localhost;
+  flush privileges;
+  exit;
+  ```
+- Optimize Database
+
+To improve performance Cacti recommended to optimize some setting in database. Edit /etc/my.cnf.d/server.cnf file.
+
+                vi /etc/my.cnf.d/server.cnf 
+
+Add the below lines under the [mysqld] section.
+```
+# this is only for the mysqld standalone daemon
+[mysqld]
+collation-server = utf8mb4_unicode_ci
+character-set-server=utf8mb4
+max_heap_table_size = 64M
+tmp_table_size = 64M
+join_buffer_size = 64M
+innodb_file_format = Barracuda
+innodb_large_prefix = 1
+innodb_flush_log_at_timeout = 3
+innodb_buffer_pool_size = 1GB
+innodb_buffer_pool_instances = 10
+innodb_read_io_threads = 32
+innodb_write_io_threads = 16
+innodb_io_capacity = 5000
+innodb_io_capacity_max = 10000
+```
+- Install and Configure Cacti
+
+  - Install Cacti with yum command, it will browse for the latest version of Cacti from the repository.
+
+                yum -y install cacti
+
+  - Import the default database to the cacti database with the password we have set for our database.
+
+                mysql -u root -p cacti < /usr/share/doc/cacti-*/cacti.sql
+
+  - Edit "include/config.php" and specify the database type, name, host user, and password for our Cacti configuration.
+
+                vim /usr/share/cacti/include/config.php
+```
+/* make sure these values reflect your actual database/host/user/password */
+$database_type = "mysql";
+$database_default = "cacti";
+$database_hostname = "localhost";
+$database_username = "cactiuser";
+$database_password = "p@$$w0rd";
+$database_port = "3306";
+$database_ssl = false;
+```
+- Create a Cron Job
+
+  - Cacti need to run its query script to collect information from end devices that we monitor regularly. Mostly, we schedule Cacti to run the poller script every 5 minutes. If we install Cacti from yum command file in /etc/cron.d/cacti is already there by default.
+
+                vim /etc/cron.d/cacti
+
+  - Uncomment the following line.
+
+                */5 * * * * apache /usr/bin/php /usr/share/cacti/poller.php > /dev/null 2>&1
+
+  - Allow remote access
+
+    - When we install Cacti from yum command, it allows the only the localhost to access. To allow remote access we need to change Apache configuration.
+
+                vim /etc/httpd/conf.d/cacti.conf
+
+    Change  “Require host localhost” to “Require all granted” and “Allow from localhost” to “Allow from all.”
+
+```
+Alias /cacti /usr/share/cacti
+<Directory /usr/share/cacti/>
+            <IfModule mod_authz_core.c>
+                         # httpd 2.4
+                         Require all granted
+            </IfModule>
+            <IfModule !mod_authz_core.c>
+                         # httpd 2.2
+                         Order deny,allow
+                         Deny from all
+                         Allow from all
+            </IfModule>
+</Directory>
+```
+-  Allow Firewalld
+
+```
+firewall-cmd --permanent --add-service=http
+firewall-cmd --reload
+```
+- Disable SELinux
+
+```
+sed -i 's/enforcing/disabled/g' /etc/selinux/config
+setenforce 0
+```
+- Setup Cacti
+
+Open favorite web browser and type http://server_ip/cacti (our service IP, or domain name). The default username and password of Cacti are (user = admin, password = admin).
